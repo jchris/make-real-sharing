@@ -8,6 +8,9 @@ import {
 	fetchFromOpenAi,
 } from './lib/fetchFromOpenAi'
 
+import { fireproof } from 'use-fireproof'
+const database = fireproof('make-real')
+
 // the system prompt explains to gpt-4 what we want it to do and how it should behave.
 const systemPrompt = `You are an expert web developer who specializes in building working website prototypes from low-fidelity wireframes.
 Your job is to accept low-fidelity wireframes, then create a working prototype using HTML, CSS, and JavaScript, and finally send back the results.
@@ -49,6 +52,13 @@ export async function makeReal(editor: Editor) {
 	// then, we create an empty response shape. we'll put the response from openai in here, but for
 	// now it'll just show a spinner so the user knows we're working on it.
 	const responseShapeId = makeEmptyResponseShape(editor)
+
+	database.put({
+		op : responseShapeId.toString(),
+		type : 'prompt',
+		prompt,
+	  created: Date.now()
+	})
 
 	try {
 		// If you're using the API key input, we preference the key from there.
@@ -139,6 +149,13 @@ function populateResponseShape(
 	const start = message.indexOf('<!DOCTYPE html>')
 	const end = message.indexOf('</html>')
 	const html = message.slice(start, end + '</html>'.length)
+
+	database.put({
+		op : responseShapeId.toString(),
+		type : 'html',
+		html,
+	  created: Date.now()
+	})
 
 	// update the response shape we created earlier with the content
 	editor.updateShape<ResponseShape>({

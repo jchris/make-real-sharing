@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Card</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Additional styles if needed */
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="flex items-center space-x-4 p-2">
+                <div class="h-24 w-24 bg-green-200 rounded-full flex items-center justify-center">
+                    <span class="text-green-800 text-xl">(face)</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-semibold text-lg">Name</span>
+                    <span class="text-gray-600">City</span>
+                    <div class="flex items-center text-green-600 mt-1">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Paperwork status
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-lg font-semibold mb-2">Languages</h3>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 91.1%"></div>
+                </div>
+                <div class="flex justify-between text-xs mt-2">
+                    <span class="text-blue-600">TypeScript 91.1%</span>
+                    <span class="text-purple-600">CSS 8.6%</span>
+                    <span class="text-yellow-400">JavaScript 0.3%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
