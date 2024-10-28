@@ -29,33 +29,27 @@ export async function fetchFromOpenAi(
   }
 }
 
-export type MessageContent =
-  | string
-  | (
-    | string
-    | {
-      type: 'image_url'
-      image_url:
-      | string
-      | {
-        url: string
-        detail: 'low' | 'high' | 'auto'
-      }
-    }
-    | {
+export type MessageContentPiece =
+  | {
       type: 'text'
       text: string
     }
-  )[]
+  | {
+      type: 'image_url'
+      image_url: {
+        url: string
+        detail?: 'low' | 'high' | 'auto'
+      }
+    }
 
 export type GPT4VMessage = {
   role: 'system' | 'user' | 'assistant' | 'function'
-  content: MessageContent
-  name?: string | undefined
+  content: string | MessageContentPiece[]
+  name?: string
 }
 
 export type GPT4VCompletionRequest = {
-  model: 'gpt-4-vision-preview'
+  model: 'gpt-4o-mini' | 'gpt-4o'
   messages: GPT4VMessage[]
   functions?: unknown[] | undefined
   function_call?: unknown | undefined
@@ -90,3 +84,4 @@ export type GPT4VCompletionResponse =
       status: number
     }
   }
+

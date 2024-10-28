@@ -1,10 +1,11 @@
 import { Editor, TLShapeId, createShapeId } from '@tldraw/tldraw'
 import { ResponseShape } from './ResponseShape/ResponseShape'
 import { getSelectionAsImageDataUrl } from './lib/getSelectionAsImageDataUrl'
+
 import {
 	GPT4VCompletionResponse,
 	GPT4VMessage,
-	MessageContent,
+	MessageContentPiece,
 	fetchFromOpenAi,
 } from './lib/fetchFromOpenAi'
 
@@ -54,10 +55,10 @@ export async function makeReal(editor: Editor) {
 	const responseShapeId = makeEmptyResponseShape(editor)
 
 	database.put({
-		op : responseShapeId.toString(),
-		type : 'prompt',
+		op: responseShapeId.toString(),
+		type: 'prompt',
 		prompt,
-	  created: Date.now()
+		created: Date.now(),
 	})
 
 	try {
@@ -71,7 +72,7 @@ export async function makeReal(editor: Editor) {
 		// make a request to openai. `fetchFromOpenAi` is a next.js server action,
 		// so our api key is hidden.
 		const openAiResponse = await fetchFromOpenAi(apiKeyFromDangerousApiKeyInput, {
-			model: 'gpt-4-vision-preview',
+			model: 'gpt-4o-mini',
 			max_tokens: 4096,
 			temperature: 0,
 			messages: prompt,
@@ -94,44 +95,46 @@ async function buildPromptForOpenAi(editor: Editor): Promise<GPT4VMessage[]> {
 	// get all text within the current selection
 	const referenceText = getSelectionAsText(editor)
 
-	// the user messages describe what the user has done and what they want to do next. they'll get
-	// combined with the system prompt to tell gpt-4 what we'd like it to do.
-	const userMessages: MessageContent = [
-		{
-			type: 'image_url',
-			image_url: {
-				// send an image of the current selection to gpt-4 so it can see what we're working with
-				url: await getSelectionAsImageDataUrl(editor),
-				detail: 'high',
-			},
+	// Build the content pieces for the user message
+	const contentPieces: MessageContentPiece[] = []
+
+	// Add initial text
+	contentPieces.push({
+		type: 'text',
+		text: previousResponseContent
+			? 'Here are the latest wireframes including some notes on your previous work. Could you make a new website based on these wireframes and notes and send back just the html file?'
+			: 'Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?',
+	})
+
+	// Add the image
+	contentPieces.push({
+		type: 'image_url',
+		image_url: {
+			url: await getSelectionAsImageDataUrl(editor),
+			detail: 'high',
 		},
-		{
-			type: 'text',
-			text: previousResponseContent
-				? 'Here are the latest wireframes. Could you make a new website based on these wireframes and notes and send back just the html file?'
-				: 'Here are the latest wireframes including some notes on your previous work. Could you make a new website based on these wireframes and notes and send back just the html file?',
-		},
-		{
-			// send the text of all selected shapes, so that GPT can use it as a reference (if anything is hard to see)
-			type: 'text',
-			text:
-				referenceText !== ''
-					? referenceText
-					: 'Oh, it looks like there was not any text in this design!',
-		},
-	]
+	})
+
+	// Add reference text
+	contentPieces.push({
+		type: 'text',
+		text:
+			referenceText !== ''
+				? referenceText
+				: 'Oh, it looks like there was not any text in this design!',
+	})
 
 	if (previousResponseContent) {
-		userMessages.push({
+		contentPieces.push({
 			type: 'text',
 			text: previousResponseContent,
 		})
 	}
 
-	// combine the user prompt with the system prompt
+	// Combine the user prompt with the system prompt
 	return [
 		{ role: 'system', content: systemPrompt },
-		{ role: 'user', content: userMessages },
+		{ role: 'user', content: contentPieces },
 	]
 }
 
@@ -151,10 +154,10 @@ function populateResponseShape(
 	const html = message.slice(start, end + '</html>'.length)
 
 	database.put({
-		op : responseShapeId.toString(),
-		type : 'html',
+		op: responseShapeId.toString(),
+		type: 'html',
 		html,
-	  created: Date.now()
+		created: Date.now(),
 	})
 
 	// update the response shape we created earlier with the content
