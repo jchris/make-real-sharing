@@ -13,7 +13,7 @@
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
-    "use-fireproof": "^0.14.2"
+    "use-fireproof": "^0.19.111"
   },
   "devDependencies": {
     "@types/node": "^20",
